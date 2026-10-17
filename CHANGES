@@ -1,3 +1,8 @@
+1.0.3 2026-10-17
+  - events.tsv (67 files): the word moves from 'value' to 'trial_type' (was 'word_epoch' on every row); 'value' is now an integer code of the word (1-61), so mne_bids.read_epochs_bids can read the events. Onsets, durations, samples, word_en and source_epoch_index unchanged.
+  - task-wordreading_events.json: trial_type and value descriptions/Levels updated.
+  - README.md: events description and loading example updated.
+
 1.0.2 2026-10-17
   - dataset_description.json: replace the citation-slug Name with the human-readable title supported by README.md. Dataset recordings unchanged. Source: README.md; https://doi.org/10.52202/079017-2542.
 

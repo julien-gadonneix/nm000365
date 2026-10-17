@@ -70,9 +70,13 @@ The release does not state:
   stored **back to back**: the sidecar says `RecordingType: epoched` with `EpochLength: 3`, and the marker file has a
   `New Segment` at each epoch start. The time axis of the file is not the time axis of the original recording.
   Do not filter across epoch boundaries. To get epochs, split every 3000 samples.
-  `mne_bids.read_raw_bids` refuses epoched recordings, so read the file with `mne.io.read_raw_brainvision` and reshape it.
-- `..._events.tsv`: one row per epoch. `value` holds the word exactly as stored (UTF-8 Chinese) and `word_en` holds the
-  authors' translation. `source_epoch_index` is the epoch's position in the source pickle.
+  `mne_bids.read_raw_bids` refuses epoched recordings; use `mne_bids.read_epochs_bids` (one epoch per events.tsv row) or
+  read the file with `mne.io.read_raw_brainvision` and reshape it (see "How to load").
+- `..._events.tsv`: one row per epoch. `trial_type` holds the word exactly as stored (UTF-8 Chinese), `value` an
+  integer code of the word (1-61, assigned at packaging; codes in `task-wordreading_events.json`) and `word_en` the
+  authors' translation. `source_epoch_index` is the epoch's position in the source pickle. Up to version 1.0.2 the
+  word was in `value` and `trial_type` was `word_epoch` for every row; `mne_bids.read_epochs_bids` then failed with
+  "invalid literal for int()", because it reads `value` as an integer event code.
 - `..._channels.tsv`: all channels are `SEEG` with the authors' filter settings. `group` is the electrode shaft
   (the name prefix). All channels are `good`, since the release flags none.
 - `sub-<id>_scans.tsv`: the source file behind each recording.
@@ -126,10 +130,19 @@ raw = mne.io.read_raw_brainvision(vhdr, preload=True)          # 1000 Hz, SEEG, 
 data = raw.get_data()                                           # (n_channels, n_epochs * 3000)
 epochs = data.reshape(data.shape[0], -1, 3000).transpose(1, 0, 2)  # (n_epochs, n_channels, 3000)
 ev = pd.read_csv(vhdr.replace("_ieeg.vhdr", "_events.tsv"), sep="\t")
-labels = ev["value"].to_numpy()                                 # one Chinese word per epoch (word_en: English)
+labels = ev["trial_type"].to_numpy()                            # one Chinese word per epoch (word_en: English)
 ```
 
-`task-wordreading_events.json` lists the 61 words with the authors' English translations (`value` Levels).
+Or with MNE-BIDS `read_epochs_bids` (tested with mne-bids 0.20.0 on 2026-10-17):
+
+```python
+from mne_bids import BIDSPath, read_epochs_bids
+bp = BIDSPath(root=".", subject="001", task="wordreading", run="1", datatype="ieeg", suffix="ieeg", extension=".vhdr")
+epochs = read_epochs_bids(bp)                                   # one 3-s epoch per events.tsv row; event_id = word -> code
+```
+
+`task-wordreading_events.json` lists the 61 words with the authors' English translations (`trial_type` Levels) and the
+integer codes (`value` Levels).
 
 ## Funding and acknowledgements
 
