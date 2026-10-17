@@ -1,5 +1,5 @@
 {
-  "Name": "Zheng-2024-du-10.52202/079017-2542",
+  "Name": "Intracranial recordings during Chinese word reading aloud in 12 patients with epilepsy: preprocessed task segments",
   "BIDSVersion": "1.10.0",
   "DatasetType": "derivative",
   "License": "CC-BY-4.0",
@@ -60,5 +60,5 @@
     }
   ],
   "DatasetDOI": "10.82901/nemar.nm000365",
-  "Version": "1.0.1"
+  "Version": "1.0.2"
 }
